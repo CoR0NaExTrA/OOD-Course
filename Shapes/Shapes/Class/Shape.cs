@@ -26,7 +26,7 @@ public class Shape
 
     public void ChangeShape( IShapeStrategy newStrategy ) => _strategy = newStrategy ?? throw new ArgumentNullException( nameof( newStrategy ) );
 
-    public string Type => _strategy.Type;
+    public string Type => _strategy.GetTypeName();
     public string Color => _color;
     public string Parameters => _strategy.ParametersToString();
 

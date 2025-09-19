@@ -16,7 +16,7 @@ public class CircleStrategy : IShapeStrategy
         _r = r;
     }
 
-    public string Type => "circle";
+    public string GetTypeName() => "circle";
 
     public void Draw( ICanvas canvas, string color )
     {

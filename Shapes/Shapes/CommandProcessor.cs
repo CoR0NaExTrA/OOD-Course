@@ -95,6 +95,23 @@ public class CommandProcessor
                 double.Parse( parameters[ 0 ], CultureInfo.InvariantCulture ),
                 double.Parse( parameters[ 1 ], CultureInfo.InvariantCulture ),
                 double.Parse( parameters[ 2 ], CultureInfo.InvariantCulture ) ),
+            "rectangle" => new RectangleStrategy(
+                double.Parse( parameters[ 0 ], CultureInfo.InvariantCulture ),
+                double.Parse( parameters[ 1 ], CultureInfo.InvariantCulture ),
+                double.Parse( parameters[ 2 ], CultureInfo.InvariantCulture ),
+                double.Parse( parameters[ 3 ], CultureInfo.InvariantCulture ) ),
+            "triangle" => new TriangleStrategy(
+                double.Parse( parameters[ 0 ], CultureInfo.InvariantCulture ),
+                double.Parse( parameters[ 1 ], CultureInfo.InvariantCulture ),
+                double.Parse( parameters[ 2 ], CultureInfo.InvariantCulture ),
+                double.Parse( parameters[ 3 ], CultureInfo.InvariantCulture ),
+                double.Parse( parameters[ 4 ], CultureInfo.InvariantCulture ),
+                double.Parse( parameters[ 5 ], CultureInfo.InvariantCulture ) ),
+            "line" => new LineStrategy(
+                double.Parse( parameters[ 0 ], CultureInfo.InvariantCulture ),
+                double.Parse( parameters[ 1 ], CultureInfo.InvariantCulture ),
+                double.Parse( parameters[ 2 ], CultureInfo.InvariantCulture ),
+                double.Parse( parameters[ 3 ], CultureInfo.InvariantCulture ) ),
             _ => throw new NotSupportedException( $"Shape type {type} not supported" )
         };
 
@@ -135,8 +152,8 @@ public class CommandProcessor
             throw new ArgumentException( "MoveShape <id> <dx> <dy>" );
 
         string id = parts[ 0 ];
-        double dx = double.Parse( parts[ 1 ] );
-        double dy = double.Parse( parts[ 2 ] );
+        double dx = double.Parse( parts[ 1 ], CultureInfo.InvariantCulture );
+        double dy = double.Parse( parts[ 2 ], CultureInfo.InvariantCulture );
 
         var shape = _picture.List().FirstOrDefault( s => s.Id == id )
             ?? throw new KeyNotFoundException( $"Shape {id} not found" );
@@ -151,8 +168,8 @@ public class CommandProcessor
         if ( parts.Length != 2 )
             throw new ArgumentException( "MovePicture <dx> <dy>" );
 
-        double dx = double.Parse( parts[ 0 ] );
-        double dy = double.Parse( parts[ 1 ] );
+        double dx = double.Parse( parts[ 0 ], CultureInfo.InvariantCulture );
+        double dy = double.Parse( parts[ 1 ], CultureInfo.InvariantCulture );
 
         _picture.MovePicture( dx, dy );
         Console.WriteLine( "Picture moved" );
@@ -197,9 +214,26 @@ public class CommandProcessor
         IShapeStrategy newStrategy = type switch
         {
             "circle" => new CircleStrategy(
-                double.Parse( parameters[ 0 ] ),
-                double.Parse( parameters[ 1 ] ),
-                double.Parse( parameters[ 2 ] ) ),
+                double.Parse( parameters[ 0 ], CultureInfo.InvariantCulture ),
+                double.Parse( parameters[ 1 ], CultureInfo.InvariantCulture ),
+                double.Parse( parameters[ 2 ], CultureInfo.InvariantCulture ) ),
+            "rectangle" => new RectangleStrategy(
+                double.Parse( parameters[ 0 ], CultureInfo.InvariantCulture ),
+                double.Parse( parameters[ 1 ], CultureInfo.InvariantCulture ),
+                double.Parse( parameters[ 2 ], CultureInfo.InvariantCulture ),
+                double.Parse( parameters[ 3 ], CultureInfo.InvariantCulture ) ),
+            "triangle" => new TriangleStrategy(
+                double.Parse( parameters[ 0 ], CultureInfo.InvariantCulture ),
+                double.Parse( parameters[ 1 ], CultureInfo.InvariantCulture ),
+                double.Parse( parameters[ 2 ], CultureInfo.InvariantCulture ),
+                double.Parse( parameters[ 3 ], CultureInfo.InvariantCulture ),
+                double.Parse( parameters[ 4 ], CultureInfo.InvariantCulture ),
+                double.Parse( parameters[ 5 ], CultureInfo.InvariantCulture ) ),
+            "line" => new LineStrategy(
+                double.Parse( parameters[ 0 ], CultureInfo.InvariantCulture ),
+                double.Parse( parameters[ 1 ], CultureInfo.InvariantCulture ),
+                double.Parse( parameters[ 2 ], CultureInfo.InvariantCulture ),
+                double.Parse( parameters[ 3 ], CultureInfo.InvariantCulture ) ),
             _ => throw new NotSupportedException( $"Shape type {type} not supported" )
         };
 

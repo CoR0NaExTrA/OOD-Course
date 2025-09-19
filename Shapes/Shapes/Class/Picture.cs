@@ -3,7 +3,7 @@
 namespace Shapes.Class.shapes;
 public class Picture
 {
-    private readonly Dictionary<string, Shape> _shapes = new();
+    private readonly IDictionary<string, Shape> _shapes = new Dictionary<string, Shape>();
 
     public void AddShape( Shape shape )
     {

@@ -1,7 +1,7 @@
 ﻿namespace Shapes.Interface.shapes;
 public interface IShapeStrategy
 {
-    string Type { get; }
+    string GetTypeName();
     void Draw( gfx.ICanvas canvas, string color );
     void Move( double dx, double dy );
     void Change( IReadOnlyList<string> parameters );
