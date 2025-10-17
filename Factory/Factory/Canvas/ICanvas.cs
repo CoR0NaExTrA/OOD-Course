@@ -1,4 +1,4 @@
-﻿namespace Factory;
+﻿namespace Factory.Canvas;
 public interface ICanvas : IDisposable
 {
     void SetColor( Color c );

@@ -1,4 +1,6 @@
-﻿namespace Factory;
+﻿using Factory.ShapeFactory;
+
+namespace Factory.Designer;
 public class Designer : IDesigner
 {
     private readonly IShapeFactory _factory;
@@ -27,7 +29,7 @@ public class Designer : IDesigner
                 if ( shape != null )
                     draft.AddShape( shape );
             }
-            catch ( System.Exception ex )
+            catch ( Exception ex )
             {
                 // simple error reporting to stdout
                 Console.Error.WriteLine( $"Failed to parse line {lineNo}: {ex.Message}" );

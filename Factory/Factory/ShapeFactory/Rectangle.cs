@@ -1,6 +1,7 @@
 ﻿using System.Drawing;
+using Factory.Canvas;
 
-namespace Factory;
+namespace Factory.ShapeFactory;
 public class Rectangle : Shape
 {
     public Point LeftTop { get; }

@@ -1,7 +1,7 @@
 ﻿using System.Drawing;
 using System.Globalization;
 
-namespace Factory;
+namespace Factory.ShapeFactory;
 public class ShapeFactory : IShapeFactory
 {
     public Shape CreateShape( string descr )

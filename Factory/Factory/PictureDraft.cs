@@ -1,4 +1,6 @@
-﻿namespace Factory;
+﻿using Factory.ShapeFactory;
+
+namespace Factory;
 public class PictureDraft
 {
     private readonly List<Shape> _shapes = new List<Shape>();

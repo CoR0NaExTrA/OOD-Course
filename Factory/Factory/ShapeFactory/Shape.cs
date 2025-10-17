@@ -1,6 +1,7 @@
 ﻿using System.Drawing;
+using Factory.Canvas;
 
-namespace Factory;
+namespace Factory.ShapeFactory;
 public abstract class Shape
 {
     protected readonly Color _color;

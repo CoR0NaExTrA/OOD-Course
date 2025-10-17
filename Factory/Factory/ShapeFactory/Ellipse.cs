@@ -1,6 +1,7 @@
 ﻿using System.Drawing;
+using Factory.Canvas;
 
-namespace Factory;
+namespace Factory.ShapeFactory;
 public class Ellipse : Shape
 {
     public Point Center { get; }

@@ -1,4 +1,6 @@
-﻿namespace Factory;
+﻿using Factory.Canvas;
+
+namespace Factory;
 public class Painter
 {
     public void DrawPicture( PictureDraft draft, ICanvas canvas )

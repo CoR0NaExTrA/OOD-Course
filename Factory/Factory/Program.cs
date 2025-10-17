@@ -1,4 +1,7 @@
 ﻿using Factory;
+using Factory.Canvas;
+using Factory.Designer;
+using Factory.ShapeFactory;
 
 class Program
 {
@@ -14,7 +17,7 @@ class Program
             var draft = designer.CreateDraft( reader );
 
 
-            using ( var canvas = new SvgCanvas( svgPath, 800, 600 ) )
+            using ( var canvas = new SvgCanvas( svgPath, 1000, 1000 ) )
             {
                 var painter = new Painter();
                 painter.DrawPicture( draft, canvas );

@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using System.Text;
 
-namespace Factory;
+namespace Factory.Canvas;
 public class SvgCanvas : ICanvas
 {
     private readonly StreamWriter _w;
