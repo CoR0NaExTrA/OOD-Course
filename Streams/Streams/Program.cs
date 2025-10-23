@@ -1,5 +1,6 @@
-﻿using Transform.Streams;
-using Transform.Decorators;
+﻿using Transform.Decorators;
+using Transform.Streams;
+using Transform.Utils;
 
 namespace Transform;
 class Program
@@ -17,7 +18,9 @@ class Program
         string outputFile = args[ ^1 ];
 
         for ( int i = 0; i < args.Length - 2; i++ )
+        {
             options.Add( args[ i ] );
+        }
 
         using IInputDataStream input = BuildInputPipeline( inputFile, options );
         using IOutputDataStream output = BuildOutputPipeline( outputFile, options );
@@ -27,24 +30,37 @@ class Program
 
     static IInputDataStream BuildInputPipeline( string path, List<string> options )
     {
-        IInputDataStream stream = new FileInputStream( path );
+        Logger.Log( $"BuildInputPipeline started. Path: {path}, Options: {string.Join( ", ", options )}" );
+        Logger.Log( $"Options count: {options.Count}" );
 
-        for ( int i = options.Count - 1; i >= 0; i-- )
+        for ( int i = 0; i < options.Count; i++ )
         {
+            Logger.Log( $"Option[{i}] = '{options[ i ]}' (length: {options[ i ]?.Length})" );
+        }
+
+        IInputDataStream stream = new FileInputStream( path );
+        Logger.Log( "Created FileInputStream" );
+
+        for ( int i = options.Count - 1; i >= 0; i--)
+        {
+            Logger.Log( options[ i ] );
             switch ( options[ i ] )
             {
                 case "--decompress":
+
+                    Logger.Log( "Adding DecompressInputStreamDecorator to pipeline" );
                     stream = new DecompressInputStreamDecorator( stream );
                     break;
 
                 case "--decrypt":
                     int key = int.Parse( options[ i + 1 ] );
+                    Logger.Log( $"Adding DecryptInputStreamDecorator to pipeline with key: {key}" );
                     stream = new DecryptInputStreamDecorator( stream, key );
-                    i--;
                     break;
             }
         }
 
+        Logger.Log( "BuildInputPipeline completed" );
         return stream;
     }
 

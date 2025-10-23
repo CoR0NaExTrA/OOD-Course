@@ -3,9 +3,6 @@ public static class RleCodec
 {
     public static byte[] Compress( byte[] data )
     {
-        if ( data.Length == 0 )
-            return Array.Empty<byte>();
-
         var result = new List<byte>();
         for ( int i = 0; i < data.Length; )
         {
@@ -22,11 +19,6 @@ public static class RleCodec
 
     public static byte[] Decompress( byte[] data )
     {
-        if ( data.Length == 0 )
-            return Array.Empty<byte>();
-        if ( data.Length % 2 != 0 )
-            throw new ArgumentException( "Compressed data length must be even" );
-
         var result = new List<byte>();
         for ( int i = 0; i < data.Length; i += 2 )
         {

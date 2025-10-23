@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Transform": {
+      "commandName": "Project",
+      "commandLineArgs": "Transform.exe --decompress --decrypt 100500 --decrypt 3 output input_restored"
+    }
+  }
+}
