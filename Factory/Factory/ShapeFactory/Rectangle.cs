@@ -18,7 +18,6 @@ public class Rectangle : Shape
     public override void Draw( ICanvas canvas )
     {
         canvas.SetColor( _color );
-        // draw four edges
         var lt = LeftTop;
         var rb = RightBottom;
         var rt = new Point( rb.X, lt.Y );

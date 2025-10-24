@@ -1,85 +1,127 @@
-﻿using System.Drawing;
-using System.Globalization;
+﻿using System.Globalization;
+//TODO: Разбить на методы и переименовать, рассказать про фабричный метод и чтобы изменилось если использовать его вместо абстрактной фабрики, UML поправить
 
 namespace Factory.ShapeFactory;
 public class ShapeFactory : IShapeFactory
 {
     public Shape CreateShape( string descr )
     {
-        var parts = descr.Split( new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries );
+        var parts = SplitDescription( descr );
         if ( parts.Length == 0 )
             return null;
 
+        var (type, color, paramStartIndex) = ParseTypeAndColor( parts );
+        var parameters = ExtractNumericParameters( parts, paramStartIndex );
 
+        return CreateShapeByType( type, color, parameters, parts.Length - paramStartIndex );
+    }
+
+    private string[] SplitDescription( string descr )
+    {
+        return descr.Split( new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries );
+    }
+
+    private (string type, Color color, int paramStartIndex) ParseTypeAndColor( string[] parts )
+    {
         var type = parts[ 0 ].ToLowerInvariant();
-        int idx = 1;
-
-
-        // optional color next
         Color color = Color.Black;
-        if ( parts.Length > 1 && Enum.TryParse<Color>( parts[ 1 ], true, out var c ) )
+        int paramStartIndex = 1;
+
+        if ( parts.Length > 1 && Enum.TryParse<Color>( parts[ 1 ], true, out var parsedColor ) )
         {
-            color = c;
-            idx = 2;
+            color = parsedColor;
+            paramStartIndex = 2;
         }
 
+        return (type, color, paramStartIndex);
+    }
 
-        // helpers
-        double p( int i ) => double.Parse( parts[ idx + i ], CultureInfo.InvariantCulture );
+    private double[] ExtractNumericParameters( string[] parts, int startIndex )
+    {
+        var parameters = new double[ parts.Length - startIndex ];
+        for ( int i = 0; i < parameters.Length; i++ )
+        {
+            parameters[ i ] = double.Parse( parts[ startIndex + i ], CultureInfo.InvariantCulture );
+        }
+        return parameters;
+    }
 
+    private double GetParameter( double[] parameters, int index )
+    {
+        return parameters[ index ];
+    }
 
+    private Point CreatePoint( double x, double y )
+    {
+        return new Point( x, y );
+    }
+
+    private Shape CreateShapeByType( string type, Color color, double[] parameters, int parameterCount )
+    {
         switch ( type )
         {
             case "rectangle":
             case "rect":
-                // rect left top right bottom
-                if ( parts.Length < idx + 4 )
-                    throw new Exception( "Rectangle needs 4 numeric params: left top right bottom" );
-                var left = p( 0 );
-                var top = p( 1 );
-                var right = p( 2 );
-                var bottom = p( 3 );
-                return new Rectangle( new Point( left, top ), new Point( right, bottom ), color );
-
+                ValidateParameterCount( parameterCount, 4, "Rectangle needs 4 numeric params: left top right bottom" );
+                return CreateRectangle( color, parameters );
 
             case "triangle":
-                // triangle x1 y1 x2 y2 x3 y3
-                if ( parts.Length < idx + 6 )
-                    throw new Exception( "Triangle needs 6 numeric params" );
-                return new Triangle(
-                new Point( p( 0 ), p( 1 ) ),
-                new Point( p( 2 ), p( 3 ) ),
-                new Point( p( 4 ), p( 5 ) ),
-                color );
-
+                ValidateParameterCount( parameterCount, 6, "Triangle needs 6 numeric params" );
+                return CreateTriangle( color, parameters );
 
             case "ellipse":
-                // ellipse cx cy rx ry
-                if ( parts.Length < idx + 4 )
-                    throw new Exception( "Ellipse needs 4 numeric params: cx cy rx ry" );
-                return new Ellipse( new Point( p( 0 ), p( 1 ) ), p( 2 ), p( 3 ), color );
-
+                ValidateParameterCount( parameterCount, 4, "Ellipse needs 4 numeric params: cx cy rx ry" );
+                return CreateEllipse( color, parameters );
 
             case "polygon":
             case "regularpolygon":
-            case "poly":
-                // polygon n cx cy radius (regular polygon)
-                if ( parts.Length < idx + 4 )
-                    throw new Exception( "RegularPolygon needs 4 params: vertexCount cx cy radius" );
-                int n = int.Parse( parts[ idx ], CultureInfo.InvariantCulture );
-                double cx = p( 1 );
-                double cy = p( 2 );
-                double r = p( 3 );
-                return new RegularPolygon( n, new Point( cx, cy ), r, color );
-
-
-            case "polypts":
-                // polypts color x1 y1 x2 y2 ...
-                throw new NotImplementedException( "polypts not implemented. Use polygon (regular) or explicit shapes." );
-
+                ValidateParameterCount( parameterCount, 4, "RegularPolygon needs 4 params: vertexCount cx cy radius" );
+                return CreateRegularPolygon( color, parameters );
 
             default:
-                throw new Exception( $"Unknown shape type '{parts[ 0 ]}'" );
+                throw new Exception( $"Unknown shape type '{type}'" );
         }
+    }
+
+    private void ValidateParameterCount( int actualCount, int expectedCount, string errorMessage )
+    {
+        if ( actualCount < expectedCount )
+            throw new Exception( errorMessage );
+    }
+
+    private Rectangle CreateRectangle( Color color, double[] parameters )
+    {
+        var left = GetParameter( parameters, 0 );
+        var top = GetParameter( parameters, 1 );
+        var right = GetParameter( parameters, 2 );
+        var bottom = GetParameter( parameters, 3 );
+        return new Rectangle( CreatePoint( left, top ), CreatePoint( right, bottom ), color );
+    }
+
+    private Triangle CreateTriangle( Color color, double[] parameters )
+    {
+        return new Triangle(
+            CreatePoint( GetParameter( parameters, 0 ), GetParameter( parameters, 1 ) ),
+            CreatePoint( GetParameter( parameters, 2 ), GetParameter( parameters, 3 ) ),
+            CreatePoint( GetParameter( parameters, 4 ), GetParameter( parameters, 5 ) ),
+            color );
+    }
+
+    private Ellipse CreateEllipse( Color color, double[] parameters )
+    {
+        var cx = GetParameter( parameters, 0 );
+        var cy = GetParameter( parameters, 1 );
+        var rx = GetParameter( parameters, 2 );
+        var ry = GetParameter( parameters, 3 );
+        return new Ellipse( CreatePoint( cx, cy ), rx, ry, color );
+    }
+
+    private RegularPolygon CreateRegularPolygon( Color color, double[] parameters )
+    {
+        int vertexCount = ( int )GetParameter( parameters, 0 );
+        var cx = GetParameter( parameters, 1 );
+        var cy = GetParameter( parameters, 2 );
+        var radius = GetParameter( parameters, 3 );
+        return new RegularPolygon( vertexCount, CreatePoint( cx, cy ), radius, color );
     }
 }

@@ -23,7 +23,6 @@ public class SvgCanvas : ICanvas
     public void SetColor( Color c )
     {
         _currentColor = c;
-        // also emit a comment line to stdout for primitive commands
         Console.WriteLine( $"SetColor {_currentColor}" );
     }
 

@@ -31,7 +31,6 @@ public class Designer : IDesigner
             }
             catch ( Exception ex )
             {
-                // simple error reporting to stdout
                 Console.Error.WriteLine( $"Failed to parse line {lineNo}: {ex.Message}" );
             }
         }

@@ -25,7 +25,7 @@ public class RegularPolygon : Shape
         var pts = new Point[ VertexCount ];
         for ( int i = 0; i < VertexCount; i++ )
         {
-            double ang = 2.0 * Math.PI * i / VertexCount - Math.PI / 2.0; // start at top
+            double ang = 2.0 * Math.PI * i / VertexCount - Math.PI / 2.0;
             pts[ i ] = new Point( Center.X + Radius * Math.Cos( ang ), Center.Y + Radius * Math.Sin( ang ) );
         }
         for ( int i = 0; i < VertexCount; i++ )

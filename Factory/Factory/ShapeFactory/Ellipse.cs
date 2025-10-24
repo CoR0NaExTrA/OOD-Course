@@ -20,7 +20,6 @@ public class Ellipse : Shape
     public override void Draw( ICanvas canvas )
     {
         canvas.SetColor( _color );
-        // SVG ellipse expects bounding box or cx,cy,rx,ry
         double left = Center.X - Rx;
         double top = Center.Y - Ry;
         double w = Rx * 2;
