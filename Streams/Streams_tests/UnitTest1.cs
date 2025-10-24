@@ -1,8 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using Xunit;
-using Transform.Streams;
+﻿using Transform.Streams;
 using Transform.Decorators;
 using Transform.Utils;
 
