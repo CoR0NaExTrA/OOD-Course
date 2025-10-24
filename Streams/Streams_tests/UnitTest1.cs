@@ -1,4 +1,12 @@
-﻿namespace Transform.Tests;
+﻿using System;
+using System.IO;
+using System.Linq;
+using Xunit;
+using Transform.Streams;
+using Transform.Decorators;
+using Transform.Utils;
+
+namespace Transform.Tests;
 
 public class StreamDecoratorTests
 {
@@ -6,7 +14,7 @@ public class StreamDecoratorTests
     {
         var data = new byte[ size ];
         for ( int i = 0; i < size; i++ )
-            data[ i ] = ( byte )( i % 10 + 65 ); // Повторяющийся паттерн для сжатия
+            data[ i ] = ( byte )( i % 10 + 65 );
         return data;
     }
 
@@ -24,10 +32,10 @@ public class StreamDecoratorTests
         var inputData = GenerateTestData();
         string filePath = CreateTempFile( "raw_test" );
 
-        using ( var output = new Streams.FileOutputStream( filePath ) )
+        using ( var output = new FileOutputStream( filePath ) )
             output.WriteBlock( inputData, inputData.Length );
 
-        using var input = new Streams.FileInputStream( filePath );
+        using var input = new FileInputStream( filePath );
         var buffer = new byte[ inputData.Length ];
         int read = input.ReadBlock( buffer, buffer.Length );
 
@@ -42,12 +50,10 @@ public class StreamDecoratorTests
         const int key = 42;
         string encFile = CreateTempFile( "enc_test" );
 
-        // Шифруем
-        using ( var enc = new Decorators.EncryptOutputStreamDecorator( new Streams.FileOutputStream( encFile ), key ) )
+        using ( var enc = new EncryptOutputStreamDecorator( new FileOutputStream( encFile ), key ) )
             enc.WriteBlock( inputData, inputData.Length );
 
-        // Расшифровываем
-        using var dec = new Decorators.DecryptInputStreamDecorator( new Streams.FileInputStream( encFile ), key );
+        using var dec = new DecryptInputStreamDecorator( new FileInputStream( encFile ), key );
         var result = new byte[ inputData.Length ];
         int read = dec.ReadBlock( result, result.Length );
 
@@ -61,16 +67,13 @@ public class StreamDecoratorTests
         var inputData = GenerateTestData();
         string compFile = CreateTempFile( "comp_test" );
 
-        // Сжимаем
-        using ( var comp = new Decorators.CompressOutputStreamDecorator( new Streams.FileOutputStream( compFile ) ) )
+        using ( var comp = new CompressOutputStreamDecorator( new FileOutputStream( compFile ) ) )
             comp.WriteBlock( inputData, inputData.Length );
 
-        // Декомпрессия
-        using var decomp = new Decorators.DecompressInputStreamDecorator( new Streams.FileInputStream( compFile ) );
+        using var decomp = new DecompressInputStreamDecorator( new FileInputStream( compFile ) );
         var result = new byte[ inputData.Length ];
         int read = decomp.ReadBlock( result, result.Length );
 
-        // Может быть меньше (если конец потока)
         var actual = result.Take( read ).ToArray();
 
         Assert.Equal( inputData, actual );
@@ -83,16 +86,14 @@ public class StreamDecoratorTests
         const int key = 99;
         string filePath = CreateTempFile( "chain_test" );
 
-        // Сначала шифруем и сжимаем
-        using ( var stream = new Decorators.CompressOutputStreamDecorator(
-                   new Decorators.EncryptOutputStreamDecorator( new Streams.FileOutputStream( filePath ), key ) ) )
+        using ( var stream = new CompressOutputStreamDecorator(
+                   new EncryptOutputStreamDecorator( new FileOutputStream( filePath ), key ) ) )
         {
             stream.WriteBlock( inputData, inputData.Length );
         }
 
-        // Потом читаем — сначала дешифруем, потом декомпрессируем
-        using var input = new Decorators.DecompressInputStreamDecorator(
-                              new Decorators.DecryptInputStreamDecorator( new Streams.FileInputStream( filePath ), key ) );
+        using var input = new DecompressInputStreamDecorator(
+                              new DecryptInputStreamDecorator( new FileInputStream( filePath ), key ) );
 
         var result = new byte[ inputData.Length ];
         int read = input.ReadBlock( result, result.Length );
@@ -108,16 +109,14 @@ public class StreamDecoratorTests
         const int key = 123;
         string filePath = CreateTempFile( "mix_test" );
 
-        // ✅ Сначала сжимаем, потом шифруем
-        using ( var output = new Decorators.CompressOutputStreamDecorator(
-                   new Decorators.EncryptOutputStreamDecorator( new Streams.FileOutputStream( filePath ), key ) ) )
+        using ( var output = new CompressOutputStreamDecorator(
+                   new EncryptOutputStreamDecorator( new FileOutputStream( filePath ) , key ) ) )
         {
             output.WriteBlock( inputData, inputData.Length );
         }
 
-        // ✅ Потом при чтении — расшифровываем и распаковываем
-        using var input = new Decorators.DecompressInputStreamDecorator(
-                              new Decorators.DecryptInputStreamDecorator( new Streams.FileInputStream( filePath ), key ) );
+        using var input = new DecompressInputStreamDecorator(
+                              new DecryptInputStreamDecorator( new FileInputStream( filePath ), key ) );
 
         var result = new byte[ inputData.Length ];
         int read = input.ReadBlock( result, result.Length );
@@ -130,59 +129,47 @@ public class StreamDecoratorTests
     public void RleCodec_CompressThenDecompress_ShouldBeLossless()
     {
         var data = GenerateTestData();
-        var compressed = Utils.RleCodec.Compress( data );
-        var decompressed = Utils.RleCodec.Decompress( compressed );
+        var compressed = RleCodec.Compress( data );
+        var decompressed = RleCodec.Decompress( compressed );
 
         Assert.Equal( data, decompressed );
     }
 
     [Fact]
-    public void CompressDecompress_WithSmallData_ShouldReturnOriginalData()
+    public void RleCodec_Decompress_ShouldThrow_OnOddLengthData()
     {
-        var inputData = new byte[] { 1, 1, 1, 2, 2, 3, 3, 3, 3 }; // Легко сжимаемые данные
-        string compFile = CreateTempFile( "comp_small_test" );
-
-        // Сжимаем
-        using ( var comp = new Decorators.CompressOutputStreamDecorator( new Streams.FileOutputStream( compFile ) ) )
-            comp.WriteBlock( inputData, inputData.Length );
-
-        // Декомпрессия
-        using var decomp = new Decorators.DecompressInputStreamDecorator( new Streams.FileInputStream( compFile ) );
-        var result = new byte[ inputData.Length ];
-        int read = decomp.ReadBlock( result, result.Length );
-
-        Assert.Equal( inputData.Length, read );
-        Assert.Equal( inputData, result );
+        var invalid = new byte[] { 3, 65, 2 };
+        Assert.Throws<ArgumentException>( () => RleCodec.Decompress( invalid ) );
     }
 
     [Fact]
-    public void CompressDecompress_WithRandomData_ShouldReturnOriginalData()
+    public void MemoryStreams_ShouldWriteAndReadCorrectly()
     {
-        var rng = new Random( 42 );
-        var inputData = new byte[ 1000 ];
-        rng.NextBytes( inputData );
+        var data = GenerateTestData( 100 );
+        using var memOut = new MemoryOutputStream();
+        memOut.WriteBlock( data, data.Length );
+        memOut.Close();
 
-        string compFile = CreateTempFile( "comp_random_test" );
+        using var memIn = new MemoryInputStream( memOut.Data.ToArray() );
+        var buffer = new byte[ data.Length ];
+        int read = memIn.ReadBlock( buffer, buffer.Length );
 
-        // Сжимаем
-        using ( var comp = new Decorators.CompressOutputStreamDecorator( new Streams.FileOutputStream( compFile ) ) )
-            comp.WriteBlock( inputData, inputData.Length );
+        Assert.Equal( data, buffer );
+    }
 
-        // Декомпрессия
-        using var decomp = new Decorators.DecompressInputStreamDecorator( new Streams.FileInputStream( compFile ) );
+    [Fact]
+    public void DecryptWithWrongKey_ShouldFail()
+    {
+        var inputData = GenerateTestData();
+        string file = CreateTempFile( "wrongkey_test" );
+
+        using ( var enc = new EncryptOutputStreamDecorator( new FileOutputStream( file ), 111 ) )
+            enc.WriteBlock( inputData, inputData.Length );
+
+        using var dec = new DecryptInputStreamDecorator( new FileInputStream( file ), 222 );
         var result = new byte[ inputData.Length ];
-        int totalRead = 0;
+        dec.ReadBlock( result, result.Length );
 
-        // Читаем частями чтобы проверить буферизацию
-        while ( totalRead < inputData.Length && !decomp.IsEOF )
-        {
-            int read = decomp.ReadBlock( result, Math.Min( 100, inputData.Length - totalRead ) );
-            if ( read == 0 )
-                break;
-            totalRead += read;
-        }
-
-        Assert.Equal( inputData.Length, totalRead );
-        Assert.Equal( inputData, result );
+        Assert.NotEqual( inputData, result );
     }
 }

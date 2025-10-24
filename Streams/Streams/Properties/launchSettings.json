@@ -2,7 +2,7 @@
   "profiles": {
     "Transform": {
       "commandName": "Project",
-      "commandLineArgs": "Transform.exe --decompress --decrypt 100500 --decrypt 3 output input_restored"
+      "commandLineArgs": "Transform.exe --encrypt 3 --encrypt 100500 --compress input output"
     }
   }
 }
