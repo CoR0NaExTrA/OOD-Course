@@ -3,7 +3,7 @@ using DocumentEditor.Model;
 
 namespace DocumentEditor.Commands;
 // InsertImageCommand
-class InsertImageCommand : ICommand, IResourceAffecting
+public class InsertImageCommand : ICommand, IResourceAffecting
 {
     private readonly Document _doc;
     private readonly string _sourcePath;

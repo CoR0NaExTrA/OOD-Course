@@ -3,7 +3,7 @@ using DocumentEditor.Model;
 
 namespace DocumentEditor.Commands;
 // ResizeImageCommand with merging for same image object
-class ResizeImageCommand : ICommand
+public class ResizeImageCommand : ICommand
 {
     private readonly Document _doc;
     private readonly ImageItem _image;

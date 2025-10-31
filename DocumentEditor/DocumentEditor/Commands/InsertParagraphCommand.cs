@@ -3,7 +3,7 @@ using DocumentEditor.Model;
 
 namespace DocumentEditor.Commands;
 // InsertParagraphCommand
-class InsertParagraphCommand : ICommand
+public class InsertParagraphCommand : ICommand
 {
     private readonly Document _doc;
     private readonly string _text;

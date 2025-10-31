@@ -3,7 +3,7 @@ using DocumentEditor.Model;
 
 namespace DocumentEditor.Commands;
 // SetTitleCommand with merge ability
-class SetTitleCommand : ICommand
+public class SetTitleCommand : ICommand
 {
     private readonly Document _doc;
     private readonly string _newTitle;

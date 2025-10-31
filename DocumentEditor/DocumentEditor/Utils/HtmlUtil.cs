@@ -1,6 +1,6 @@
 ﻿namespace DocumentEditor.Utils;
 // Простая утилита для HTML-escape
-static class HtmlUtil
+public static class HtmlUtil
 {
     public static string Escape( string s )
     {

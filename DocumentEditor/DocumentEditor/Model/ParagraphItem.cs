@@ -1,7 +1,7 @@
 ﻿using DocumentEditor.Interfaces;
 
 namespace DocumentEditor.Model;
-class ParagraphItem : DocumentItem, IParagraph
+public class ParagraphItem : DocumentItem, IParagraph
 {
     private string _text;
     public ParagraphItem( string text ) => _text = text;

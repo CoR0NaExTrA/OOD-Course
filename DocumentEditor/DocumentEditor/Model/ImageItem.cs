@@ -1,7 +1,7 @@
 ﻿using DocumentEditor.Interfaces;
 
 namespace DocumentEditor.Model;
-class ImageItem : DocumentItem, IImage
+public class ImageItem : DocumentItem, IImage
 {
     private string _relativePath; // relative to document HTML directory (e.g. images/img1.png)
     private int _width, _height;

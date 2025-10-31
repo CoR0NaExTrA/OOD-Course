@@ -3,7 +3,7 @@ using DocumentEditor.Model;
 
 namespace DocumentEditor.Commands;
 // ReplaceTextCommand with merging for same paragraph object
-class ReplaceTextCommand : ICommand
+public class ReplaceTextCommand : ICommand
 {
     private readonly Document _doc;
     private readonly ParagraphItem _paragraph; // direct reference

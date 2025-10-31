@@ -3,7 +3,7 @@ using DocumentEditor.Model;
 
 namespace DocumentEditor.Commands;
 // DeleteItemCommand (if deleting image, should mark resource for deletion; on undo should restore)
-class DeleteItemCommand : ICommand, IResourceAffecting
+public class DeleteItemCommand : ICommand, IResourceAffecting
 {
     private readonly Document _doc;
     private readonly int _index; // 0-based index at time of execution

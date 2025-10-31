@@ -4,7 +4,6 @@ using DocumentEditor.Model;
 using DocumentEditor.Commands;
 
 namespace DocumentEditor;
-// ---------- Парсер команд и main loop ----------
 class Program
 {
     static void PrintHelp()
@@ -46,10 +45,18 @@ class Program
             {
                 var parts = SplitKeepingQuoted( line );
                 var cmd = parts[ 0 ].ToLowerInvariant();
+
                 if ( cmd == "help" )
-                { PrintHelp(); continue; }
+                { 
+                    PrintHelp(); 
+                    continue; 
+                }
+
                 if ( cmd == "exit" )
+                {
                     break;
+                }
+
                 if ( cmd == "list" )
                 {
                     Console.WriteLine( $"Title: {doc.GetTitle()}" );
@@ -63,6 +70,7 @@ class Program
                     }
                     continue;
                 }
+
                 if ( cmd == "insertparagraph" )
                 {
                     if ( parts.Length < 3 )
@@ -86,6 +94,7 @@ class Program
                     doc.ExecuteCommand( command );
                     continue;
                 }
+
                 if ( cmd == "insertimage" )
                 {
                     if ( parts.Length < 5 )
@@ -122,6 +131,7 @@ class Program
                     }
                     continue;
                 }
+
                 if ( cmd == "settitle" )
                 {
                     if ( parts.Length < 2 )
@@ -131,6 +141,7 @@ class Program
                     doc.ExecuteCommand( cmdSet );
                     continue;
                 }
+
                 if ( cmd == "replacetext" )
                 {
                     if ( parts.Length < 3 )
@@ -148,6 +159,7 @@ class Program
                     doc.ExecuteCommand( cmdRepl );
                     continue;
                 }
+
                 if ( cmd == "resizeimage" )
                 {
                     if ( parts.Length != 4 )
@@ -164,6 +176,7 @@ class Program
                     doc.ExecuteCommand( cmdResize );
                     continue;
                 }
+
                 if ( cmd == "deleteitem" )
                 {
                     if ( parts.Length != 2 )
@@ -177,16 +190,19 @@ class Program
                     doc.ExecuteCommand( cmdDel );
                     continue;
                 }
+
                 if ( cmd == "undo" )
                 {
                     doc.Undo();
                     continue;
                 }
+
                 if ( cmd == "redo" )
                 {
                     doc.Redo();
                     continue;
                 }
+
                 if ( cmd == "save" )
                 {
                     if ( parts.Length != 2 )
@@ -198,10 +214,12 @@ class Program
 
                 Console.WriteLine( "Unknown command. Type Help." );
             }
+
             catch ( ArgumentOutOfRangeException )
             {
                 Console.WriteLine( "Error: position out of range" );
             }
+
             catch ( Exception ex )
             {
                 Console.WriteLine( $"Error: {ex.Message}" );

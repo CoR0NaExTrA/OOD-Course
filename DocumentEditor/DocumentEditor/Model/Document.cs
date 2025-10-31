@@ -5,7 +5,7 @@ using System.Text;
 namespace DocumentEditor.Model;
 // Документ - основной класс, инкапсулирует историю, элементы, операции
 
-class Document : IDisposable
+public class Document : IDisposable
 {
     private readonly List<DocumentItem> _items = new();
     private string _title = "";
@@ -57,9 +57,16 @@ class Document : IDisposable
 
         // Generate unique name but preserve extension
         var ext = Path.GetExtension( sourcePath );
-        var fileName = $"img_{Guid.NewGuid():N}{ext}";
+        var fileName = Path.GetFileName( sourcePath );
         var destRel = Path.Combine( "images", fileName );
         var destFull = Path.Combine( _workingDir, destRel );
+        int counter = 1;
+        while ( File.Exists( destFull ) )
+        {
+            fileName = $"{Path.GetFileNameWithoutExtension( sourcePath )}_{counter++}{Path.GetExtension( sourcePath )}";
+            destRel = Path.Combine( "images", fileName );
+            destFull = Path.Combine( _workingDir, destRel );
+        }
         Directory.CreateDirectory( Path.GetDirectoryName( destFull ) ?? _workingDir );
         File.Copy( sourcePath, destFull );
         var img = new ImageItem( destRel.Replace( '\\', '/' ), width, height );
@@ -190,64 +197,48 @@ class Document : IDisposable
     // Сохранение в HTML
     public void SaveAsHtml( string htmlPath )
     {
-        var fullHtmlPath = Path.GetFullPath( htmlPath );
-        var dir = Path.GetDirectoryName( fullHtmlPath );
-        if ( string.IsNullOrEmpty( dir ) )
-            dir = Directory.GetCurrentDirectory();
-        Directory.CreateDirectory( dir );
-        var imagesOutDir = Path.Combine( dir, "images" );
-        Directory.CreateDirectory( imagesOutDir );
+        // теперь htmlPath будет внутри doc_work
+        var fullHtmlPath = Path.Combine( _workingDir, Path.GetFileName( htmlPath ) );
+        var imagesOutDir = _imagesDir; // images уже внутри doc_work
 
-        // Copy images that are present (and not marked deleted) to output images dir
-        var imagesToCopy = new Dictionary<string, string>(); // relative path in doc -> dest absolute
-        foreach ( var item in _items )
+        // копирование изображений
+        foreach ( var item in _items.OfType<ImageItem>() )
         {
-            if ( item is ImageItem img )
-            {
-                if ( img.IsMarkedDeleted )
-                    continue;
-                var srcFull = Path.Combine( _workingDir, img.GetPath().Replace( '/', Path.DirectorySeparatorChar ) );
-                var dstFull = Path.Combine( imagesOutDir, Path.GetFileName( img.GetPath() ) );
-                // If source and destination are same path we still copy to ensure output dir has them
-                try
-                {
-                    File.Copy( srcFull, dstFull, true );
-                }
-                catch ( Exception ex )
-                {
-                    Console.WriteLine( $"Warning: failed to copy image {srcFull} -> {dstFull}: {ex.Message}" );
-                }
-            }
+            if ( item.IsMarkedDeleted )
+                continue;
+
+            var srcFull = Path.Combine( _workingDir, item.GetPath().Replace( '/', Path.DirectorySeparatorChar ) );
+            var dstFull = Path.Combine( imagesOutDir, Path.GetFileName( item.GetPath() ) );
+            File.Copy( srcFull, dstFull, true );
         }
 
-        // generate HTML
+        // генерируем HTML
         var sb = new StringBuilder();
         sb.AppendLine( "<!doctype html>" );
-        sb.AppendLine( "<html>" );
-        sb.AppendLine( "<head>" );
+        sb.AppendLine( "<html><head>" );
         sb.AppendLine( $"  <meta charset=\"utf-8\"/>" );
         sb.AppendLine( $"  <title>{HtmlUtil.Escape( _title )}</title>" );
-        sb.AppendLine( "</head>" );
-        sb.AppendLine( "<body>" );
+        sb.AppendLine( "</head><body>" );
         sb.AppendLine( $"<h1>{HtmlUtil.Escape( _title )}</h1>" );
+
         foreach ( var item in _items )
         {
-            if ( item is ParagraphItem p )
+            switch ( item )
             {
-                sb.AppendLine( $"<p>{HtmlUtil.Escape( p.GetText() )}</p>" );
-            }
-            else if ( item is ImageItem img )
-            {
-                if ( img.IsMarkedDeleted )
-                    continue;
-                var rel = Path.GetFileName( img.GetPath() ); // images/filename -> filename in images subdir
-                sb.AppendLine( $"<img src=\"doc_work/images/{HtmlUtil.Escape( rel )}\" width=\"{img.GetWidth()}\" height=\"{img.GetHeight()}\" />" );
+                case ParagraphItem p:
+                    sb.AppendLine( $"<p>{HtmlUtil.Escape( p.GetText() )}</p>" );
+                    break;
+
+                case ImageItem img when !img.IsMarkedDeleted:
+                    var rel = Path.GetFileName( img.GetPath() );
+                    sb.AppendLine( $"<img src=\"images/{HtmlUtil.Escape( rel )}\" width=\"{img.GetWidth()}\" height=\"{img.GetHeight()}\" />" );
+                    break;
             }
         }
-        sb.AppendLine( "</body>" );
-        sb.AppendLine( "</html>" );
 
+        sb.AppendLine( "</body></html>" );
         File.WriteAllText( fullHtmlPath, sb.ToString(), Encoding.UTF8 );
+
         Console.WriteLine( $"Saved HTML to {fullHtmlPath}" );
     }
 
