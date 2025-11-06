@@ -1,5 +1,7 @@
 using DocumentEditor.Commands;
+using DocumentEditor.Image;
 using DocumentEditor.Model;
+using DocumentEditor.Paragraph;
 using DocumentEditor.Utils;
 using Xunit;
 
@@ -247,6 +249,78 @@ public class ResizeImageCommandTests
         cmd.Unexecute();
         Assert.Equal( 100, img.GetWidth() );
         Assert.Equal( 200, img.GetHeight() );
+    }
+}
+
+public class DeleteItemCommandTests
+{
+    [Fact]
+    public void Execute_ShouldRemoveItem()
+    {
+        using var tempDir = new TempFolder();
+        var doc = new Document( tempDir.Path );
+        doc.InsertParagraph( "To delete" );
+        var cmd = new DeleteItemCommand( doc, 0 );
+
+        cmd.Execute();
+        Assert.Equal( 0, doc.GetItemsCount() );
+    }
+
+    [Fact]
+    public void Unexecute_ShouldRestoreItem()
+    {
+        using var tempDir = new TempFolder();
+        var doc = new Document( tempDir.Path );
+        doc.InsertParagraph( "To restore" );
+        var cmd = new DeleteItemCommand( doc, 0 );
+
+        cmd.Execute();
+        cmd.Unexecute();
+
+        Assert.Equal( 1, doc.GetItemsCount() );
+        var item = doc.GetItem( 0 );
+        Assert.IsType<ParagraphItem>( item );
+    }
+}
+
+public class DocumentPersistenceTests
+{
+    [Fact]
+    public void SaveAsHtml_ShouldIncludeMultipleParagraphsAndImages()
+    {
+        using var tempDir = new TempFolder();
+        var doc = new Document( tempDir.Path );
+
+        var src = Path.Combine( tempDir.Path, "src.png" );
+        File.WriteAllText( src, "fakeimg" );
+
+        doc.SetTitle( "My Doc" );
+        doc.InsertParagraph( "Para1" );
+        doc.InsertParagraph( "Para2" );
+        doc.InsertImageFromPath( src, 100, 200 );
+
+        var htmlFile = Path.Combine( tempDir.Path, "output.html" );
+        doc.SaveAsHtml( htmlFile );
+
+        var html = File.ReadAllText( htmlFile );
+        Assert.Contains( "<p>Para1</p>", html );
+        Assert.Contains( "<p>Para2</p>", html );
+        Assert.Contains( "<img", html );
+        Assert.Contains( "My Doc", html );
+    }
+
+    [Fact]
+    public void SaveAsHtml_ShouldEscapeText()
+    {
+        using var tempDir = new TempFolder();
+        var doc = new Document( tempDir.Path );
+        doc.InsertParagraph( "<b>Bold</b>" );
+
+        var htmlFile = Path.Combine( tempDir.Path, "escaped.html" );
+        doc.SaveAsHtml( htmlFile );
+
+        var html = File.ReadAllText( htmlFile );
+        Assert.Contains( "&lt;b&gt;Bold&lt;/b&gt;", html );
     }
 }
 

@@ -1,5 +1,4 @@
-﻿using DocumentEditor.Interfaces;
-using DocumentEditor.Model;
+﻿using DocumentEditor.Model;
 
 namespace DocumentEditor.Commands;
 // SetTitleCommand with merge ability

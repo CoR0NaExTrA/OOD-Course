@@ -1,5 +1,7 @@
-﻿using DocumentEditor.Interfaces;
+﻿using DocumentEditor.Image;
+using DocumentEditor.Interfaces;
 using DocumentEditor.Model;
+using DocumentEditor.Paragraph;
 
 namespace DocumentEditor.Commands;
 // DeleteItemCommand (if deleting image, should mark resource for deletion; on undo should restore)

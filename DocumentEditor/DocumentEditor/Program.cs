@@ -2,6 +2,8 @@
 using System.Text.RegularExpressions;
 using DocumentEditor.Model;
 using DocumentEditor.Commands;
+using DocumentEditor.Image;
+using DocumentEditor.Paragraph;
 
 namespace DocumentEditor;
 class Program

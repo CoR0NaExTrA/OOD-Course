@@ -1,4 +1,5 @@
-﻿using DocumentEditor.Interfaces;
+﻿using DocumentEditor.Image;
+using DocumentEditor.Interfaces;
 using DocumentEditor.Model;
 
 namespace DocumentEditor.Commands;

@@ -1,5 +1,5 @@
-﻿using DocumentEditor.Interfaces;
-using DocumentEditor.Model;
+﻿using DocumentEditor.Model;
+using DocumentEditor.Paragraph;
 
 namespace DocumentEditor.Commands;
 // InsertParagraphCommand
