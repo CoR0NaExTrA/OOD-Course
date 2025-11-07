@@ -1,3 +1,4 @@
+```mermaid
 classDiagram
 direction LR
 
@@ -70,3 +71,4 @@ ModernGraphicsRendererAdapter --> CModernGraphicsRenderer
 ModernGraphicsRendererAdapter --> CPoint
 CTriangle --> Point
 CRectangle --> Point
+```
