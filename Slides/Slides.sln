@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36603.0 d17.14
+VisualStudioVersion = 17.14.36603.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Slides", "Slides\Slides.csproj", "{80E793ED-43F8-49EC-BAAC-A8F0A5BE5B59}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Slides_tests", "Slides_tests\Slides_tests.csproj", "{47792046-3981-459A-B2CB-681CD529DDF0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{80E793ED-43F8-49EC-BAAC-A8F0A5BE5B59}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{80E793ED-43F8-49EC-BAAC-A8F0A5BE5B59}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{80E793ED-43F8-49EC-BAAC-A8F0A5BE5B59}.Release|Any CPU.Build.0 = Release|Any CPU
+		{47792046-3981-459A-B2CB-681CD529DDF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47792046-3981-459A-B2CB-681CD529DDF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47792046-3981-459A-B2CB-681CD529DDF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47792046-3981-459A-B2CB-681CD529DDF0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
