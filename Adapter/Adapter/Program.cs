@@ -4,7 +4,6 @@ using graphics_lib;
 using modern_graphics_lib;
 using shape_drawing_lib;
 
-// 🔹 Адаптер объекта: позволяет использовать ModernGraphicsRenderer как ICanvas
 public class ModernGraphicsRendererAdapter : ICanvas, IDisposable
 {
     private readonly CModernGraphicsRenderer m_renderer;

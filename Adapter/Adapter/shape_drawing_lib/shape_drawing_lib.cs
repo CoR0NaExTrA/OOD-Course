@@ -5,7 +5,11 @@ using graphics_lib;
 public struct Point
 {
     public int x, y;
-    public Point( int x, int y ) { this.x = x; this.y = y; }
+    public Point( int x, int y ) 
+    { 
+        this.x = x; 
+        this.y = y; 
+    }
 }
 
 public interface ICanvasDrawable
