@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using TiledImage.CoW;
-
+﻿using TiledImage.Drawing;
 
 namespace TiledImage;
+
 class Program
 {
     static void Main(string[] args)

@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36717.8 d17.14
+VisualStudioVersion = 17.14.36717.8
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TiledImage", "TiledImage\TiledImage.csproj", "{EC6AF3E4-C3E3-467D-BAF1-C89E62E591BA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TiledImage_tests", "TiledImage_tests\TiledImage_tests.csproj", "{1F288D7F-2E16-41EF-9815-DAA658DB42E9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{EC6AF3E4-C3E3-467D-BAF1-C89E62E591BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EC6AF3E4-C3E3-467D-BAF1-C89E62E591BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EC6AF3E4-C3E3-467D-BAF1-C89E62E591BA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F288D7F-2E16-41EF-9815-DAA658DB42E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F288D7F-2E16-41EF-9815-DAA658DB42E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F288D7F-2E16-41EF-9815-DAA658DB42E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F288D7F-2E16-41EF-9815-DAA658DB42E9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
