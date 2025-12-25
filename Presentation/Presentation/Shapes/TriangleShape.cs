@@ -45,9 +45,6 @@ public class TriangleShape : Shape
                 c.DrawPath( path, paint );
             }
         }
-
-        if ( IsSelected )
-            DrawSelection( c );
     }
 
     public override bool HitTest( SKPoint p )

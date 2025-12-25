@@ -25,6 +25,5 @@ public class AddImageCommand : ICommand
     public void Undo()
     {
         doc.Shapes.Remove( shape );
-        shape.IsSelected = false;
     }
 }

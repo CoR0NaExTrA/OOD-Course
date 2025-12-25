@@ -1,4 +1,5 @@
-﻿using SkiaSharp;
+﻿using Presentation.Core;
+using SkiaSharp;
 using System;
 using System.IO;
 
@@ -9,9 +10,12 @@ public class ImageShape : Shape
     public string ImageId { get; set; }
     public string SourceFilenameHint { get; set; }
 
-    public ImageShape( SKRect bounds, string imageId, string sourceFilenameHint = null )
+    private readonly ImageRepository repo;
+
+    public ImageShape( SKRect bounds, ImageRepository repo, string imageId, string sourceFilenameHint = null )
         : base( ShapeType.Rectangle, bounds )
     {
+        this.repo = repo;
         ImageId = imageId;
         SourceFilenameHint = sourceFilenameHint;
         Type = ShapeType.Rectangle;
@@ -19,7 +23,7 @@ public class ImageShape : Shape
 
     public override void Draw( SKCanvas c )
     {
-        var bytes = Document.ImageRepo?.GetImageBytes( ImageId );
+        var bytes = repo?.GetImageBytes( ImageId );
         if ( bytes != null )
         {
             try
@@ -52,9 +56,6 @@ public class ImageShape : Shape
                 c.DrawRect( Bounds, paint );
             }
         }
-
-        if ( IsSelected )
-            DrawSelection( c );
     }
 
     public override bool HitTest( SKPoint p )

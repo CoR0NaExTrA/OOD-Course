@@ -18,9 +18,6 @@ public class EllipseShape : Shape
             paint.Color = SKColors.DarkBlue;
             c.DrawOval( Bounds, paint );
         }
-
-        if ( IsSelected )
-            DrawSelection( c );
     }
 
     public override bool HitTest( SKPoint p )

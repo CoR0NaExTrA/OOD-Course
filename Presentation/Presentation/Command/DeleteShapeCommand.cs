@@ -21,7 +21,6 @@ public class DeleteShapeCommand : ICommand
         if ( oldIndex >= 0 )
             doc.Shapes.RemoveAt( oldIndex );
 
-        shape.IsSelected = false;
     }
 
     public void Undo()

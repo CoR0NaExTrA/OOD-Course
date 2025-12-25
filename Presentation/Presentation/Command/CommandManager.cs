@@ -37,4 +37,10 @@ public class UndoRedoManager
         cmd.Execute();
         undo.Push( cmd );
     }
+
+    public void Clear()
+    {
+        undo.Clear(); 
+        redo.Clear();
+    }
 }

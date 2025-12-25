@@ -18,9 +18,6 @@ public class RectShape : Shape
             paint.Color = SKColors.DarkGreen;
             c.DrawRect( Bounds, paint );
         }
-
-        if ( IsSelected )
-            DrawSelection( c );
     }
 
     public override bool HitTest( SKPoint p )

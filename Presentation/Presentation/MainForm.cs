@@ -1,7 +1,7 @@
-﻿using Presentation.Presenter;
+﻿using Presentation.Core.DocumentSerializer;
+using Presentation.Presenter;
 using Presentation.Shapes;
 using SkiaSharp.Views.Desktop;
-
 
 namespace ShapesEditor;
 
@@ -10,12 +10,16 @@ public partial class MainForm : Form, ICanvasView
     private SKControl skControl;
     private ToolStrip toolStrip;
     private CanvasPresenter presenter;
+    private IDocumentSerializer serializer;
+    private readonly Document document;
     private string currentFile = null;
 
-    public MainForm()
+    public MainForm( Document document, IDocumentSerializer serializer )
     {
         BuildUi();
-        presenter = new CanvasPresenter( this, new Document() );
+        presenter = new CanvasPresenter( this, document, serializer );
+        this.document = document;
+        this.serializer = serializer;
     }
 
     private void BuildUi()
@@ -36,11 +40,13 @@ public partial class MainForm : Form, ICanvasView
         var open = new ToolStripMenuItem( "Open" );
         var save = new ToolStripMenuItem( "Save" );
         var saveAs = new ToolStripMenuItem( "Save As" );
+        var newWindow = new ToolStripMenuItem( "New Window" );
 
         file.DropDownItems.Add( insertImage );
         file.DropDownItems.Add( open );
         file.DropDownItems.Add( save );
         file.DropDownItems.Add( saveAs );
+        file.DropDownItems.Add( newWindow );
         menu.Items.Add( file );
 
         Controls.Add( menu );
@@ -68,15 +74,23 @@ public partial class MainForm : Form, ICanvasView
         KeyPreview = true;
         this.KeyDown += MainForm_KeyDown;
 
+        newWindow.Click += ( s, e ) =>
+        {
+            var newForm = new MainForm( document, serializer );
+            newForm.Show();
+        };
+
         open.Click += ( s, e ) =>
         {
             var dlg = new OpenFileDialog { Filter = "JSON Files|*.json" };
             if ( dlg.ShowDialog() == DialogResult.OK )
             {
-                presenter.LoadDocument( dlg.FileName );
-                currentFile = dlg.FileName;
+                var doc = serializer.Load( dlg.FileName );
+                var newForm = new MainForm( doc, serializer );
+                newForm.Show();
             }
         };
+
 
         save.Click += ( s, e ) =>
         {

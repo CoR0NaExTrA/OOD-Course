@@ -8,7 +8,7 @@ public enum ShapeType { Rectangle, Ellipse, Triangle }
 public abstract class Shape
 {
     public SKRect Bounds { get; set; }
-    public bool IsSelected { get; set; } = false;
+    //public bool IsSelected { get; set; } = false;
     public ShapeType Type { get; protected set; }
 
     protected Shape( ShapeType type, SKRect bounds )
@@ -90,32 +90,32 @@ public abstract class Shape
         switch ( handleIndex )
         {
             case 0:
-                left = mousePos.X;
-                top = mousePos.Y;
+                left = Math.Max(0, mousePos.X);
+                top = Math.Max(0, mousePos.Y);
                 break;
             case 1:
-                top = mousePos.Y;
+                top = Math.Max( 0, mousePos.Y );
                 break;
-            case 2:
-                right = mousePos.X;
-                top = mousePos.Y;
+            case 2: 
+                right = Math.Min( canvasBounds.Width, mousePos.X );
+                top = Math.Max( 0, mousePos.Y );
                 break;
             case 3:
-                right = mousePos.X;
+                right = Math.Min( canvasBounds.Width, mousePos.X );
                 break;
             case 4:
-                right = mousePos.X;
-                bottom = mousePos.Y;
+                right = Math.Min( canvasBounds.Width, mousePos.X );
+                bottom = Math.Min( canvasBounds.Height, mousePos.Y );
                 break;
             case 5:
-                bottom = mousePos.Y;
+                bottom = Math.Min( canvasBounds.Height, mousePos.Y );
                 break;
             case 6:
-                left = mousePos.X;
-                bottom = mousePos.Y;
+                left = Math.Max( 0, mousePos.X );
+                bottom = Math.Min( canvasBounds.Height, mousePos.Y );
                 break;
             case 7:
-                left = mousePos.X;
+                left = Math.Max( 0, mousePos.X );
                 break;
         }
 

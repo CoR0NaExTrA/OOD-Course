@@ -1,5 +1,4 @@
-using System;
-using System.Windows.Forms;
+using Presentation.Core.DocumentSerializer;
 
 namespace ShapesEditor;
 
@@ -12,9 +11,9 @@ static class Program
         Application.EnableVisualStyles();
         Application.SetCompatibleTextRenderingDefault( false );
 
-        var form = new MainForm();
-        var form1 = new MainForm();
-        form1.Show();
-        Application.Run( form );
+        var doc = new Document();
+        var serializer = new JsonDocumentSerializer();
+
+        Application.Run( new MainForm( doc, serializer ) );
     }
 }
