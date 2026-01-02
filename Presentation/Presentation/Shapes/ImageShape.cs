@@ -1,7 +1,5 @@
 ﻿using Presentation.Core;
 using SkiaSharp;
-using System;
-using System.IO;
 
 namespace Presentation.Shapes;
 

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-
-namespace Presentation.Core;
+﻿namespace Presentation.Core;
 
 public class ImageRepository
 {
@@ -23,15 +18,6 @@ public class ImageRepository
         var ext = Path.GetExtension( filePath ) ?? ".img";
         var dest = Path.Combine( tempFolder, id + ext );
         File.Copy( filePath, dest, true );
-        idToPath[ id ] = dest;
-        return id;
-    }
-
-    public string AddImageBytes( byte[] bytes, string extension = ".img" )
-    {
-        var id = Guid.NewGuid().ToString( "N" );
-        var dest = Path.Combine( tempFolder, id + extension );
-        File.WriteAllBytes( dest, bytes );
         idToPath[ id ] = dest;
         return id;
     }
@@ -64,27 +50,6 @@ public class ImageRepository
         return p;
     }
 
-    public void UnloadFromMemory( string id )
-    {
-        if ( id == null )
-            return;
-        cache.Remove( id );
-    }
-
-    public void Remove( string id )
-    {
-        if ( id == null )
-            return;
-        cache.Remove( id );
-        if ( idToPath.TryGetValue( id, out var path ) )
-        {
-            try
-            { if ( File.Exists( path ) ) File.Delete( path ); }
-            catch { }
-            idToPath.Remove( id );
-        }
-    }
-
     public void CleanupUnused( IEnumerable<string> usedIds )
     {
         var usedSet = new HashSet<string>( usedIds ?? Enumerable.Empty<string>() );
@@ -99,7 +64,9 @@ public class ImageRepository
                     if ( File.Exists( p ) )
                         File.Delete( p );
                 }
-                catch { }
+                catch 
+                {
+                }
                 idToPath.Remove( id );
                 cache.Remove( id );
             }

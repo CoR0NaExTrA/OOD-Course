@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Presentation.Command;
+﻿namespace Presentation.Command;
 
 public interface ICommand
 {

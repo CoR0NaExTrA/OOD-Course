@@ -1,4 +1,5 @@
-﻿using Presentation.Core.DocumentSerializer;
+﻿using Presentation.Core;
+using Presentation.Core.DocumentSerializer;
 using Presentation.Presenter;
 using Presentation.Shapes;
 using SkiaSharp.Views.Desktop;
@@ -11,16 +12,24 @@ public partial class MainForm : Form, ICanvasView
     private ToolStrip toolStrip;
     private CanvasPresenter presenter;
     private IDocumentSerializer serializer;
-    private readonly Document document;
+    private DocumentContext context;
     private string currentFile = null;
 
-    public MainForm( Document document, IDocumentSerializer serializer )
+    public MainForm(DocumentContext context, IDocumentSerializer serializer)
     {
-        BuildUi();
-        presenter = new CanvasPresenter( this, document, serializer );
-        this.document = document;
+        this.context = context;
         this.serializer = serializer;
+
+        BuildUi();
+
+        presenter = new CanvasPresenter(this, context.document, serializer);
+
+        context.documentChanged += () =>
+        {
+            presenter.SetDocument(context.document);
+        };
     }
+
 
     private void BuildUi()
     {
@@ -74,10 +83,12 @@ public partial class MainForm : Form, ICanvasView
         KeyPreview = true;
         this.KeyDown += MainForm_KeyDown;
 
+        //поправить историю для нового окна
         newWindow.Click += ( s, e ) =>
         {
-            var newForm = new MainForm( document, serializer );
+            var newForm = new MainForm( context, serializer );
             newForm.Show();
+            newForm.currentFile = currentFile;
         };
 
         open.Click += ( s, e ) =>
@@ -86,8 +97,8 @@ public partial class MainForm : Form, ICanvasView
             if ( dlg.ShowDialog() == DialogResult.OK )
             {
                 var doc = serializer.Load( dlg.FileName );
-                var newForm = new MainForm( doc, serializer );
-                newForm.Show();
+                context.Open(doc);
+                currentFile = dlg.FileName;
             }
         };
 
@@ -140,6 +151,15 @@ public partial class MainForm : Form, ICanvasView
         if ( e.Control && e.KeyCode == Keys.Y )
         {
             presenter.Redo();
+        }
+
+        if ( e.Control && e.KeyCode == Keys.S )
+        {
+            if (currentFile == null)
+            {
+                return;
+            }
+            presenter.SaveDocument(currentFile);
         }
     }
 

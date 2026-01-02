@@ -9,7 +9,7 @@ namespace Presentation.Presenter;
 public class CanvasPresenter
 {
     private readonly ICanvasView view;
-    private readonly Document doc;
+    private Document doc;
     private readonly IDocumentSerializer serializer;
 
     private readonly List<Shape> selected = new();
@@ -21,14 +21,26 @@ public class CanvasPresenter
     private SKRect resizeBefore;
     private Dictionary<Shape, SKRect> dragBeforeMap = new();
 
-    private readonly UndoRedoManager history = new();
-
     public CanvasPresenter( ICanvasView view, Document doc, IDocumentSerializer serializer )
     {
         this.view = view ?? throw new ArgumentNullException( nameof( view ) );
         this.doc = doc ?? throw new ArgumentNullException( nameof( doc ) );
         this.serializer = serializer ?? throw new ArgumentNullException( nameof( doc ) );
     }
+
+    public void SetDocument(Document document)
+    {
+        if (document == null)
+            throw new ArgumentNullException(nameof(document));
+
+        doc.History.Clear();
+        doc.Shapes.Clear();
+
+        doc.Shapes.AddRange(document.Shapes);
+
+        view.InvalidateCanvas();
+    }
+
 
     public void AddShape( ShapeType type )
     {
@@ -44,7 +56,7 @@ public class CanvasPresenter
             _ => new RectShape( rect )
         };
         var cmd = new AddShapeCommand( doc, s );
-        history.Execute( cmd );
+        doc.History.Execute( cmd );
         DoCleanup();
         view.InvalidateCanvas();
         SelectSingle( s );
@@ -55,7 +67,7 @@ public class CanvasPresenter
         if ( selected.Count == 0 )
             return;
 
-        history.Execute(
+        doc.History.Execute(
             new DeleteGroupCommand( doc, selected )
         );
 
@@ -173,17 +185,39 @@ public class CanvasPresenter
     {
         if ( dragging && selected.Count > 0 )
         {
-            dragging = false;
-
-            foreach ( var s in selected )
+            if (dragging && selected.Count == 1)
             {
-                history.Execute(
-                    new MoveShapeCommand(
-                        s,
-                        dragBeforeMap[ s ],
-                        s.Bounds
-                    )
-                );
+                dragging = false;
+
+                foreach (var s in selected)
+                {
+                    //переделать на MoveGroupCommand, поправить перемещение до края 
+                    doc.History.Execute(
+                        new MoveShapeCommand(
+                            s,
+                            dragBeforeMap[s],
+                            s.Bounds
+                        )
+                    );
+                }
+                DoCleanup();
+            }
+            else
+            {
+                dragging = false;
+
+                foreach (var s in selected)
+                {
+                    //переделать на MoveGroupCommand, поправить перемещение до края 
+                    doc.History.Execute(
+                        new MoveShapeCommand(
+                            s,
+                            dragBeforeMap[s],
+                            s.Bounds
+                        )
+                    );
+                }
+                DoCleanup();
             }
         }
 
@@ -191,9 +225,10 @@ public class CanvasPresenter
         {
             resizing = false;
             var s = selected[ 0 ];
-            history.Execute(
+            doc.History.Execute(
                 new ResizeShapeCommand( s, resizeBefore, s.Bounds )
             );
+            DoCleanup();
         }
 
         view.InvalidateCanvas();
@@ -241,7 +276,7 @@ public class CanvasPresenter
 
         var shape = new ImageShape( rect, doc.ImageRepo, id, Path.GetFileName( filePath ) );
         var cmd = new AddImageCommand( doc, shape, filePath );
-        history.Execute( cmd );
+        doc.History.Execute( cmd );
         SelectSingle( shape );
 
         DoCleanup();
@@ -249,18 +284,19 @@ public class CanvasPresenter
 
     public void Undo()
     {
-        history.Undo();
+        doc.History.Undo();
         ClearSelection();
         view.InvalidateCanvas();
     }
 
     public void Redo()
     {
-        history.Redo();
+        doc.History.Redo();
         ClearSelection();
         view.InvalidateCanvas();
     }
 
+    //подумать, оставить DoCleanup в presenter или перенести его
     private void DoCleanup()
     {
         var used = doc.Shapes.OfType<ImageShape>().Select( s => s.ImageId ).Where( id => id != null ).ToList();
@@ -275,7 +311,7 @@ public class CanvasPresenter
 
     public void LoadDocument( string path )
     {
-        history.Clear();
+        doc.History.Clear();
         var loaded = serializer.Load( path );
         doc.Shapes.Clear();
         doc.Shapes.AddRange( loaded.Shapes );
