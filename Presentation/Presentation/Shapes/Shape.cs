@@ -8,7 +8,6 @@ public enum ShapeType { Rectangle, Ellipse, Triangle }
 public abstract class Shape
 {
     public SKRect Bounds { get; set; }
-    //public bool IsSelected { get; set; } = false;
     public ShapeType Type { get; protected set; }
 
     protected Shape( ShapeType type, SKRect bounds )
@@ -51,8 +50,8 @@ public abstract class Shape
         var r = Bounds;
         var cx = ( r.Left + r.Right ) / 2;
         var cy = ( r.Top + r.Bottom ) / 2;
-        return new SKPoint[]
-        {
+        return
+        [
             new SKPoint(r.Left, r.Top),
             new SKPoint(cx, r.Top),
             new SKPoint(r.Right, r.Top),
@@ -61,7 +60,7 @@ public abstract class Shape
             new SKPoint(cx, r.Bottom),
             new SKPoint(r.Left, r.Bottom),
             new SKPoint(r.Left, cy)
-        };
+        ];
     }
 
     public virtual void MoveBy( float dx, float dy, SKRect canvasBounds )

@@ -18,14 +18,15 @@ public class CanvasPresenter
     private int activeHandle = -1;
     private SKPoint lastMouse;
 
-    private SKRect resizeBefore;
+    private Dictionary<Shape, SKRect> resizeBeforeMap;
+    private SKRect groupBoundsBefore;
     private Dictionary<Shape, SKRect> dragBeforeMap = new();
 
     public CanvasPresenter( ICanvasView view, Document doc, IDocumentSerializer serializer )
     {
         this.view = view ?? throw new ArgumentNullException( nameof( view ) );
         this.doc = doc ?? throw new ArgumentNullException( nameof( doc ) );
-        this.serializer = serializer ?? throw new ArgumentNullException( nameof( doc ) );
+        this.serializer = serializer ?? throw new ArgumentNullException( nameof( serializer ) );
     }
 
     public void SetDocument(Document document)
@@ -95,17 +96,19 @@ public class CanvasPresenter
         lastMouse = new SKPoint( e.X, e.Y );
         var p = new SKPoint( e.X, e.Y );
 
-        if ( selected.Count == 1 )
+        if ( selected.Count >= 1 )
         {
-            var shape = selected[ 0 ];
-            var handles = shape.GetHandleCenters();
+            var groupBounds = GetGroupBounds( selected );
+            var handles = new RectShape( groupBounds ).GetHandleCenters();
+
             for ( int i = 0; i < handles.Length; i++ )
             {
                 if ( Distance( handles[ i ], lastMouse ) <= 8 )
                 {
                     resizing = true;
                     activeHandle = i;
-                    resizeBefore = shape.Bounds;
+                    groupBoundsBefore = groupBounds;
+                    resizeBeforeMap = selected.ToDictionary( s => s, s => s.Bounds );
                     return;
                 }
             }
@@ -152,16 +155,36 @@ public class CanvasPresenter
         var delta = new SKPoint( cur.X - lastMouse.X, cur.Y - lastMouse.Y );
         lastMouse = cur;
 
-        if ( resizing && selected.Count == 1 )
+        if ( resizing && selected.Count > 0 )
         {
-            var s = selected[ 0 ];
             var canvasRect = new SKRect(
                 0, 0,
                 view.GetCanvasSize().W,
                 view.GetCanvasSize().H
             );
 
-            s.ResizeFromHandle( activeHandle, cur, canvasRect );
+            var fakeGroup = new RectShape( groupBoundsBefore );
+            fakeGroup.ResizeFromHandle( activeHandle, cur, canvasRect );
+            var newGroupBounds = fakeGroup.Bounds;
+
+            float sx = newGroupBounds.Width / groupBoundsBefore.Width;
+            float sy = newGroupBounds.Height / groupBoundsBefore.Height;
+
+            foreach ( var s in selected )
+            {
+                var old = resizeBeforeMap[ s ];
+
+                var relLeft = ( old.Left - groupBoundsBefore.Left ) / groupBoundsBefore.Width;
+                var relTop = ( old.Top - groupBoundsBefore.Top ) / groupBoundsBefore.Height;
+
+                s.Bounds = SKRect.Create(
+                    newGroupBounds.Left + relLeft * newGroupBounds.Width,
+                    newGroupBounds.Top + relTop * newGroupBounds.Height,
+                    old.Width * sx,
+                    old.Height * sy
+                );
+            }
+
             view.InvalidateCanvas();
             return;
         }
@@ -185,53 +208,35 @@ public class CanvasPresenter
     {
         if ( dragging && selected.Count > 0 )
         {
-            if (dragging && selected.Count == 1)
-            {
-                dragging = false;
-
-                foreach (var s in selected)
-                {
-                    //переделать на MoveGroupCommand, поправить перемещение до края 
-                    doc.History.Execute(
-                        new MoveShapeCommand(
-                            s,
-                            dragBeforeMap[s],
-                            s.Bounds
-                        )
-                    );
-                }
-                DoCleanup();
-            }
-            else
-            {
-                dragging = false;
-
-                foreach (var s in selected)
-                {
-                    //переделать на MoveGroupCommand, поправить перемещение до края 
-                    doc.History.Execute(
-                        new MoveShapeCommand(
-                            s,
-                            dragBeforeMap[s],
-                            s.Bounds
-                        )
-                    );
-                }
-                DoCleanup();
-            }
+            dragging = false;
+            
+            doc.History.Execute(
+                new MoveGroupCommand( selected, dragBeforeMap )
+            );
+   
+            DoCleanup();
         }
 
-        if ( resizing && selected.Count == 1 )
+        if ( resizing && selected.Count > 0 )
         {
             resizing = false;
-            var s = selected[ 0 ];
+
             doc.History.Execute(
-                new ResizeShapeCommand( s, resizeBefore, s.Bounds )
+                new ResizeGroupCommand( resizeBeforeMap, selected )
             );
+
             DoCleanup();
         }
 
         view.InvalidateCanvas();
+    }
+
+    private SKRect GetGroupBounds( IEnumerable<Shape> shapes )
+    {
+        var r = shapes.First().Bounds;
+        foreach ( var s in shapes.Skip( 1 ) )
+            r = SKRect.Union( r, s.Bounds );
+        return r;
     }
 
     private void ClearSelection()
@@ -275,7 +280,7 @@ public class CanvasPresenter
         var rect = SKRect.Create( ( w - width ) / 2f, ( h - height ) / 2f, width, height );
 
         var shape = new ImageShape( rect, doc.ImageRepo, id, Path.GetFileName( filePath ) );
-        var cmd = new AddImageCommand( doc, shape, filePath );
+        var cmd = new AddImageCommand( doc, shape );
         doc.History.Execute( cmd );
         SelectSingle( shape );
 

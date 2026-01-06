@@ -1,16 +1,14 @@
-﻿namespace Presentation.Core
+﻿namespace Presentation.Core;
+
+public class DocumentContext
 {
-    public class DocumentContext
+    public Document document { get; private set; }
+
+    public event Action documentChanged;
+
+    public void Open(Document doc)
     {
-        public Document document { get; private set; }
-
-        public event Action documentChanged;
-
-        public void Open(Document doc)
-        {
-            document = doc;
-            documentChanged?.Invoke();
-        }
+        document = doc;
+        documentChanged?.Invoke();
     }
-
 }
